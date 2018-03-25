@@ -3,6 +3,16 @@ import cv2
 import os
 import shutil
 import random
+import time
+
+
+"""
+THIS FILE I MADE PURELY FOR SIMPLE YET TIME EFFICIENT OPERATIONS ON PHOTOS
+
+THE CODE STYLE OF THIS FILE IS TERRIBLE HOWEVER ITS PUBLISHED ONLY TO PROVIDE
+THIS CODE FOR VARIOUS COMPUTERS WITHOUT NEED TO COPYING IT FROM ONE TO ANOTHER MANUALLY 
+
+"""
 
 
 def copier():
@@ -53,9 +63,11 @@ def name_simpler(path):
             i = 1
             print(path + directory)
             for filename in os.listdir(path + directory):
-                if filename.startswith('2018'):
-                    os.rename(os.path.join(path + directory, filename), os.path.join(path + directory, str(i) + '.jpg'))
-                    i += 1
+                # if filename.startswith('2018'):
+                os.rename(os.path.join(path + directory, filename), os.path.join(path + directory, '2018-03-25-' + str(int(round(time.time() * 1000))) + '.jpg'))
+                i += 1
+                time.sleep(0.05)
+
 
 
 def name_changer(path, name):
@@ -69,27 +81,6 @@ def name_changer(path, name):
                     new_filename = filename.split('_')
                     # print(filename)
                     os.rename(os.path.join(path + directory, filename), os.path.join(path + directory, new_filename[0] + '.jpg'))
-
-
-def cropper(path, factor):
-    """Crop images according to set values for x & y, width & height"""
-    print('Cropping...')
-    dir_list = list(map(str, range(1, 7)))
-    for directory in os.listdir(path):
-        print(directory)
-        if directory in dir_list:
-            for filename in os.listdir(path + directory):
-                # base_filename = os.path.splitext(filename)[0]
-                frame = cv2.imread(os.path.join(path + directory, filename), 1)
-                y = int(500 * factor)  # 80 500*0.1866 200
-                x = int(650 * factor)  # 118 650*0.1866 260
-                size = int(300 * factor)  # 64 300*0.1866 120
-                cropped_image = frame[y:(y + size), x:(x + size)]
-                # base_filename = os.path.splitext(filename)[0]
-                # temp_name = str(base_filename) + '.jpg'
-                os.remove(os.path.join(path + directory, filename))
-                cv2.imwrite(os.path.join(path + directory, filename), cropped_image)
-                # os.rename(os.path.join(path + directory, filename), os.path.join(path + directory, temp_name))
 
 
 def change_perspective1(path, factor):
@@ -242,6 +233,96 @@ def change_perspective6(path, factor):
                 cv2.imwrite(os.path.join(path + directory, temp_name), dst)
 
 
+def change_perspective_once(path, factor):
+    """Change perspective getPerspectiveTransform and using warpPerspective"""
+    print('Perspectives at once')
+    for directory in os.listdir(path):
+        print(directory)
+        for dataset in os.listdir(path + directory):
+            print(dataset)
+            for filename in os.listdir(path + directory + '/' + dataset):
+                print(filename)
+                frame = cv2.imread(os.path.join(path + directory + '/' + dataset, filename), 1)
+                base_filename = os.path.splitext(filename)[0]
+                if base_filename.endswith('_ppct'):
+                    continue
+                width = int(1600 * factor)
+                height = int(1200 * factor)
+                size = int(366 * factor)
+
+                # First perspective
+
+                pts1 = np.float32([[width - 2, height], [width + size, height - 1], [width + size, height + size],
+                                   [width, height + size]])
+                pts2 = np.float32(
+                    [[width, height], [width + size, height], [width + size, height + size], [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_1_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+                # Second perspective
+
+                pts1 = np.float32([[width + 2, height], [width + size, height], [width + size - 2, height + size + 1],
+                                   [width + 1.5, height + size + 1]])
+                pts2 = np.float32(
+                    [[width, height], [width + size, height], [width + size, height + size], [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_2_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+                # Third perspective
+
+                pts1 = np.float32([[width, height], [width + size, height], [width + size, height + size],
+                                   [width - 2, height + size + 2]])
+                pts2 = np.float32(
+                    [[width, height], [width + size, height], [width + size, height + size], [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_3_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+                # Fourth perspective
+
+                pts1 = np.float32([[width, height + 2], [width + size, height + 4], [width + size + 2, height + size],
+                                   [width, height + size]])
+                pts2 = np.float32(
+                    [[width, height], [width + size, height], [width + size, height + size], [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_4_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+                # Fifth perspective
+
+                pts1 = np.float32([[width + 2, height - 2], [width + size, height], [width + size + 2, height + size],
+                                   [width, height + size]])
+                pts2 = np.float32(
+                    [[width, height], [width + size, height], [width + size, height + size], [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_5_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+                # Sixth perspective
+
+                pts1 = np.float32([[width, height+1], [width + size, height-2], [width + size, height + size-2],
+                                   [width+1, height + size]])
+                pts2 = np.float32([[width, height], [width + size, height], [width + size, height + size],
+                                   [width, height + size]])
+
+                M = cv2.getPerspectiveTransform(pts1, pts2)
+                dst = cv2.warpPerspective(frame, M, (width, height))
+                temp_name = str(base_filename) + '_6_ppct.jpg'
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, temp_name), dst)
+
+
 def remover(path, name):
     """Remove images using it name"""
     print('Removing...')
@@ -252,6 +333,30 @@ def remover(path, name):
             for filename in os.listdir(path + directory):
                 if filename.endswith(name):
                     os.remove(os.path.join(path + directory, filename))
+
+
+def cropper(path):
+    """Crop images according to set values for x & y, width & height"""
+    print('Cropping...')
+    # dir_list = list(map(str, range(1, 7)))
+    for directory in os.listdir(path):
+        print(directory)
+        for dataset in os.listdir(path + directory):
+            print(dataset)
+            for filename in os.listdir(path + directory + '/' + dataset):
+                print('Crop  ' + filename)
+                # base_filename = os.path.splitext(filename)[0]
+                frame = cv2.imread(os.path.join(path + directory + '/' + dataset, filename), 1)
+                y = 270 # int(500 * factor)  # 80 500*0.1866 200
+                x = 360 # int(650 * factor)  # 118 650*0.1866 260
+                y_size = 660 # int(300 * factor)  # 64 300*0.1866 120
+                x_size = 880
+                cropped_image = frame[y:(y + y_size), x:(x + x_size)]
+                # base_filename = os.path.splitext(filename)[0]
+                # temp_name = str(base_filename) + '.jpg'
+                os.remove(os.path.join(path + directory + '/' + dataset, filename))
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, filename), cropped_image)
+                # os.rename(os.path.join(path + directory, filename), os.path.join(path + directory, temp_name))
 
 
 def rotator(path):
@@ -277,40 +382,44 @@ def rotator(path):
 def grayer(path):
     """Convert images to grayscale using BGR2GRAY"""
     print('Graying...')
-    dir_list = list(map(str, range(1, 7)))
+    # dir_list = list(map(str, range(1, 7)))
     for directory in os.listdir(path):
         print(directory)
-        if directory in dir_list:
-            for filename in os.listdir(path + directory):
-                frame = cv2.imread(os.path.join(path + directory, filename), 1)
+        for dataset in os.listdir(path + directory):
+            print(dataset)
+            for filename in os.listdir(path + directory + '/' + dataset):
+                print(filename)
+                frame = cv2.imread(os.path.join(path + directory + '/' + dataset, filename), 1)
                 gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                cv2.imwrite(os.path.join(path + directory, filename), gray_frame)
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, filename), gray_frame)
 
 
 def scaler(path, factor):
     """Resize image to appropriate size"""
     print('Scaling...')
-    dir_list = list(map(str, range(1, 7)))
+    # dir_list = list(map(str, range(1, 7)))
     for directory in os.listdir(path):
         print(directory)
-        if directory in dir_list:
-            for filename in os.listdir(path + directory):
-                base_filename = os.path.splitext(filename)[0]
-                frame = cv2.imread(os.path.join(path + directory, filename), 1)
+        for dataset in os.listdir(path + directory):
+            print(dataset)
+            for filename in os.listdir(path + directory + '/' + dataset):
+                print('Sc  ' + filename)
+                frame = cv2.imread(os.path.join(path + directory + '/' + dataset, filename), 1)
                 scaled_frame = cv2.resize(frame, None, fx=factor, fy=factor, interpolation=cv2.INTER_CUBIC)
-                cv2.imwrite(os.path.join(path + directory, base_filename + '.jpg'), scaled_frame)
+                cv2.imwrite(os.path.join(path + directory + '/' + dataset, filename), scaled_frame)
 
 
 def rotator_angle(path, actual_angle):
     """Rotate images according to angle"""
     print('Rotating...')
-    dir_list = list(map(str, range(1, 7)))
+    # dir_list = list(map(str, range(1, 7)))
     for directory in os.listdir(path):
         print(directory)
-        if directory in dir_list:
-            for filename in os.listdir(path + directory):
-                print('\t' + filename)
-                frame = cv2.imread(os.path.join(path + directory, filename), 1)
+        for dataset in os.listdir(path + directory):
+            print(dataset)
+            for filename in os.listdir(path + directory + '/' + dataset):
+                print('Rot  ' + filename)
+                frame = cv2.imread(os.path.join(path + directory + '/' + dataset, filename), 1)
                 base_filename = os.path.splitext(filename)[0]
                 frame_center = tuple(np.array(frame.shape[1::-1])/2)
                 for i in range(0, 360, actual_angle):
@@ -318,7 +427,7 @@ def rotator_angle(path, actual_angle):
                         continue
                     matrix = cv2.getRotationMatrix2D(frame_center, i, 1)
                     result_image = cv2.warpAffine(frame, matrix, frame.shape[1::-1], flags=cv2.INTER_LINEAR)
-                    cv2.imwrite(os.path.join(path + directory, base_filename + '_' + str(i) + '_rot' + '.jpg'), result_image)
+                    cv2.imwrite(os.path.join(path + directory + '/' + dataset, base_filename + '_' + str(i) + '_rot' + '.jpg'), result_image)
 
 
 def remove_rotated(path):
@@ -347,12 +456,21 @@ def all_operations(path, factor):
     # create_empty_dirs(path)
     # name_simpler(path)
     # scaler(path, 0.1866)
+    # change_all_perspectives(path, 1)
+    # change_perspective_once(path, 1)
+    # rotator_angle(path, 30)
+    # cropper(path)
     # scaler(path, factor)
-    # change_all_perspectives(path, factor)
-    rotator_angle(path, 30)
-    cropper(path, factor)
     grayer(path)
 
+
+# all_operations('../kostki/gen_x2/', 0.727272)
+
+# name_simpler('../kostki/oryginalnyRozmiar/redOnRed/')
+# name_simpler('../kostki/oryginalnyRozmiar/whiteOnRed_distance/')
+# name_simpler('../kostki/oryginalnyRozmiar/whiteOnRed/')
+# name_simpler('../kostki/oryginalnyRozmiar/whiteOnBlue/')
+# name_simpler('../kostki/oryginalnyRozmiar/woodOnRed/')
 
 # create_dirs()
 # create_empty_dirs("original/blue/")

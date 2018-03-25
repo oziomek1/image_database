@@ -3,7 +3,7 @@ import random
 import time
 import shutil
 
-path = '../gen_dataset/'
+path = '../kostki/gen_x2/'
 train_dir = 'train/'
 test_dir = 'test/'
 
@@ -51,5 +51,6 @@ def merge_test_train_data():
     remove_test_dirs()
 
 
-# separate_test_data(0.2)
+separate_test_data(0.2)
 # merge_test_train_data()
+
